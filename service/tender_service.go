@@ -29,3 +29,7 @@ func (s *TenderService) UpdateTender(ctx context.Context, tender *model.Tender) 
 func (s *TenderService) DeleteTender(ctx context.Context, tenderID int) error {
 	return s.repo.DeleteTender(ctx, tenderID)
 }
+
+func (s *TenderService) GetTenderByID(ctx context.Context, tenderID int) (model.Tender, error) {
+	return s.repo.GetTenderByID(ctx, tenderID)
+}

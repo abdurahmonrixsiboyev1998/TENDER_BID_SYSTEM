@@ -9,13 +9,13 @@ import (
 	"tender_bid_system/config"
 	"tender_bid_system/repository"
 	"tender_bid_system/service"
+
+	_ "github.com/lib/pq"
 )
 
 func main() {
-	// Konfiguratsiyani yuklash
 	cfg := config.LoadConfig()
 
-	// Bazaga ulanish
 	db, err := sql.Open("postgres", fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 		cfg.DBHost, cfg.DBUser, cfg.DBPassword, cfg.DBName, cfg.DBPort,
@@ -25,33 +25,30 @@ func main() {
 	}
 	defer db.Close()
 
-	// Bazani tekshirish
 	if err := db.Ping(); err != nil {
 		log.Fatalf("Failed to ping database: %v", err)
 	}
 
 	log.Println("Connected to the database successfully!")
 
-	// Repositorylarni yaratish
 	userRepo := repository.NewUserRepository(db)
 	tenderRepo := repository.NewTenderRepository(db)
 	bidRepo := repository.NewBidRepository(db)
+	notiRepo := repository.NewNotificationRepository(db)
 
-	// Servislarni yaratish
 	userService := service.NewUserService(userRepo)
 	tenderService := service.NewTenderService(tenderRepo)
 	bidService := service.NewBidService(bidRepo)
+	notiService := service.NewNotificationService(notiRepo)
 
-	// Handlerlarni yaratish
 	authHandler := handler.NewUserHandler(userService)
 	tenderHandler := handler.NewTenderHandler(tenderService)
-	bidHandler := handler.NewBidHandler(bidService)
+	bidHandler := handler.NewBidHandler(bidService, userService)
+	notiHandler := handler.NewNotificationHandler(notiService)
 
-	// Routerni konfiguratsiya qilish
-	router := api.NewRouter(authHandler, tenderHandler, bidHandler)
+	router := api.NewRouter(authHandler, tenderHandler, bidHandler, notiHandler)
 
-	// Serverni ishga tushirish
-	if err := router.Run(":8080"); err != nil {
+	if err := router.Run("localhost:8080"); err != nil {
 		log.Fatalf("Failed to start the server: %v", err)
 	}
 }

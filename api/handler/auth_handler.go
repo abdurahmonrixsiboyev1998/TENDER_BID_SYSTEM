@@ -18,7 +18,6 @@ func NewUserHandler(service *service.UserService) *UserHandler {
 
 func (h *UserHandler) Register(ctx *gin.Context) {
 	var user model.User
-
 	if err := ctx.ShouldBindJSON(&user); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 		return
@@ -29,8 +28,9 @@ func (h *UserHandler) Register(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to register user"})
 		return
 	}
-
-	ctx.JSON(http.StatusCreated, createUser)
+	// fmt.Println(createUser)
+	ctx.JSONP(200, createUser)
+	// ctx.JSON(http.StatusCreated, createUser)
 }
 
 func (h *UserHandler) Login(ctx *gin.Context) {

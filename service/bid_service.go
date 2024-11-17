@@ -4,7 +4,6 @@ import (
 	"context"
 	"tender_bid_system/model"
 	"tender_bid_system/repository"
-	"time"
 )
 
 type BidService struct {
@@ -23,6 +22,10 @@ func (s *BidService) ViewBidsByTenderID(ctx context.Context, tenderID int) ([]mo
 	return s.repo.ViewBidsByTenderID(ctx, tenderID)
 }
 
-func (s *BidService) GetBidsByPrice(ctx context.Context, price float64, delivery_time time.Time) ([]model.Bid, error) {
+func (s *BidService) ViewBidsByContractorID(ctx context.Context, contractorID int) ([]model.Bid, error) {
+	return s.repo.ViewBidsByContractorID(ctx, contractorID)
+}
+
+func (s *BidService) GetBidsByPrice(ctx context.Context, price float64, delivery_time int) ([]model.Bid, error) {
 	return s.repo.GetBidsByPrice(ctx, price, delivery_time)
 }

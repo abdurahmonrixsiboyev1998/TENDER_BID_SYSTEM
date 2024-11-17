@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"tender_bid_system/model"
 
 	"github.com/Masterminds/squirrel"
@@ -17,21 +18,26 @@ func NewTenderRepository(db *sql.DB) *TenderRepository {
 }
 
 func (r *TenderRepository) CreateTender(ctx context.Context, tender *model.Tender) (model.Tender, error) {
+	if tender.Status != "open" && tender.Status != "closed" && tender.Status != "awarded" {
+		return model.Tender{}, fmt.Errorf("invalid tender status")
+	}
+	var createdTender model.Tender
 	query, args, err := squirrel.Insert("tenders").
 		Columns("client_id", "title", "description", "deadline", "budget", "status").
 		Values(tender.ClientID, tender.Title, tender.Description, tender.Deadline, tender.Budget, tender.Status).
 		PlaceholderFormat(squirrel.Dollar).
+		Suffix("RETURNING id, client_id, title, description, deadline, budget, status").
 		ToSql()
 	if err != nil {
 		return model.Tender{}, err
 	}
 
-	_, err = r.db.ExecContext(ctx, query, args...)
+	_ = r.db.QueryRow(query, args...).Scan(&createdTender.ID, &createdTender.ClientID, &createdTender.Title, &createdTender.Description, &createdTender.Deadline, &createdTender.Budget, &createdTender.Status)
 	if err != nil {
 		return model.Tender{}, err
 	}
 
-	return *tender, nil
+	return createdTender, nil
 }
 
 func (r *TenderRepository) ListTenders(ctx context.Context) ([]model.Tender, error) {
@@ -93,4 +99,24 @@ func (r *TenderRepository) DeleteTender(ctx context.Context, tenderID int) error
 		return err
 	}
 	return nil
+}
+
+func (r *TenderRepository) GetTenderByID(ctx context.Context, tenderID int) (model.Tender, error) {
+	query, args, err := squirrel.Select("*").
+		From("tenders").
+		Where(squirrel.Eq{"id": tenderID}).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+	if err != nil {
+		return model.Tender{}, err
+	}
+	var tender model.Tender
+
+	rows, err := r.db.QueryContext(ctx, query, args...)
+
+	err = rows.Scan(&tender.ID, &tender.ClientID, &tender.Title, &tender.Description, &tender.Deadline, &tender.Budget, &tender.Status)
+	if err != nil {
+		return model.Tender{}, err
+	}
+	return tender, nil
 }

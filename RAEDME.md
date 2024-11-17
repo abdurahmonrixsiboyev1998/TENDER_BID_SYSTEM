@@ -125,6 +125,3 @@ bash
 Copy code
 make run
 
-
-sqlc-generate:
-  sqlc vet ; sqlc generate

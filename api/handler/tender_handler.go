@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 	"tender_bid_system/model"
 	"tender_bid_system/service"
 
@@ -54,14 +55,16 @@ func (h *TenderHandler) UpdateTender(c *gin.Context) {
 }
 
 func (h *TenderHandler) DeleteTender(c *gin.Context) {
-	var id int
-	if err := c.ShouldBindJSON(&id); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	var id string
+	id = c.Param("id")
+	tenderId, err := strconv.Atoi(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid tender ID"})
 		return
 	}
-	err := h.service.DeleteTender(c.Request.Context(), id)
+	err = h.service.DeleteTender(c.Request.Context(), tenderId)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete tender"})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Tender deleted successfully"})

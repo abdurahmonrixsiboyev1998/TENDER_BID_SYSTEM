@@ -25,7 +25,7 @@ func (r *UserRepository) CreateUser(ctx context.Context, user *model.User) (mode
 		return model.User{}, fmt.Errorf("failed to hash password: %v", err)
 	}
 	user.Password = hashedPassword
-	if user.Role != "client" && user.Role != "bidder" {
+	if user.Role != "client" && user.Role != "contractor" {
 		return model.User{}, fmt.Errorf("invalid role")
 	}
 
@@ -43,7 +43,13 @@ func (r *UserRepository) CreateUser(ctx context.Context, user *model.User) (mode
 		return model.User{}, err
 	}
 
-	return *user, nil
+	var createdUser model.User
+	createdUser, err = r.GetUserByEmail(ctx, user.Email)
+	if err != nil {
+		return model.User{}, err
+	}
+
+	return createdUser, nil
 }
 
 func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (model.User, error) {
@@ -88,4 +94,22 @@ func (r *UserRepository) Login(ctx context.Context, email string, password strin
 		return token, nil
 	}
 	return "", err
+}
+
+func (r *UserRepository) GetUserByID(ctx context.Context, id int) (string, error) {
+	query, args, err := squirrel.Select("role").
+		From("users").
+		Where(squirrel.Eq{"id": id}).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+	if err != nil {
+		return "", err
+	}
+
+	var role string
+	err = r.db.QueryRowContext(ctx, query, args...).Scan(&role)
+	if err != nil {
+		return "", err
+	}
+	return role, nil
 }

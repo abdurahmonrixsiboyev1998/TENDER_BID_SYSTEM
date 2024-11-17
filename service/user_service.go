@@ -31,3 +31,7 @@ func (s *UserService) LoginUser(ctx context.Context, email, password string) (st
 	}
 	return token, nil
 }
+
+func (s *UserService) GetUserByID(ctx context.Context, id int) (string, error) {
+	return s.repo.GetUserByID(ctx, id)
+}
