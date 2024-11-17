@@ -28,9 +28,7 @@ func (h *UserHandler) Register(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to register user"})
 		return
 	}
-	// fmt.Println(createUser)
 	ctx.JSONP(200, createUser)
-	// ctx.JSON(http.StatusCreated, createUser)
 }
 
 func (h *UserHandler) Login(ctx *gin.Context) {
