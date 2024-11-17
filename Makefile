@@ -13,6 +13,5 @@ migrate_down:
 migrate_force:
 	@migrate -database postgres://postgres:14022014@localhost:5432/tender_bid_system?sslmode=disable -path ./migrations force
 
-sqlc-generate:
-	@sqlc vet
-	@sqlc generate
+swagger:
+	@swag init -g ./api/router.go -o api/docs force 1	

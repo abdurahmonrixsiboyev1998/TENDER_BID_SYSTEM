@@ -1,0 +1,398 @@
+basePath: /api/v1
+definitions:
+  handler.Request:
+    properties:
+      delivery_time:
+        type: integer
+      price:
+        type: number
+    type: object
+  model.Bid:
+    properties:
+      comments:
+        type: string
+      contractor_id:
+        type: integer
+      delivery_time:
+        type: integer
+      id:
+        type: integer
+      price:
+        type: number
+      status:
+        type: string
+      tender_id:
+        type: integer
+    type: object
+  model.LoginCredentials:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  model.LoginResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  model.Notification:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      message:
+        type: string
+      relation_id:
+        type: integer
+      type:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  model.Tender:
+    properties:
+      budget:
+        type: string
+      client_id:
+        type: integer
+      deadline:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      status:
+        type: string
+      title:
+        type: string
+    type: object
+  model.User:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      password:
+        type: string
+      role:
+        type: string
+      username:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API server for Tender Bid System
+  title: Tender Bid System API
+  version: "1.0"
+paths:
+  /bids:
+    post:
+      consumes:
+      - application/json
+      description: Allows contractors to submit a bid for a tender
+      parameters:
+      - description: Bid details
+        in: body
+        name: bid
+        required: true
+        schema:
+          $ref: '#/definitions/model.Bid'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Bid'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Submit a new bid
+      tags:
+      - Bid
+  /bids/price:
+    post:
+      consumes:
+      - application/json
+      description: Retrieve bids filtered by price and delivery time
+      parameters:
+      - description: Request containing price and delivery time filter
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.Request'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Bid'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get bids by price and delivery time
+      tags:
+      - Bid
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and returns JWT token
+      parameters:
+      - description: Login credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/model.LoginCredentials'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+      summary: Login user
+      tags:
+      - User
+  /notifications:
+    post:
+      consumes:
+      - application/json
+      description: Create a new notification to be sent to the user
+      parameters:
+      - description: Notification object
+        in: body
+        name: notification
+        required: true
+        schema:
+          $ref: '#/definitions/model.Notification'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Notification'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Create a new notification
+      tags:
+      - Notification
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: Registers a new user and sends a verification code to their email
+      parameters:
+      - description: User registration details
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/model.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.User'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Register a new user
+      tags:
+      - User
+  /tender/bids:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all bids associated with a specific tender ID
+      parameters:
+      - description: Tender ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of bids
+          schema:
+            items:
+              $ref: '#/definitions/model.Bid'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: View bids by tender ID
+      tags:
+      - Bid
+  /tenders:
+    post:
+      consumes:
+      - application/json
+      description: Create a new tender and store it in the system
+      parameters:
+      - description: Tender details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.Tender'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Tender'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Create a new tender
+      tags:
+      - Tender
+    put:
+      consumes:
+      - application/json
+      description: Update the details of an existing tender
+      parameters:
+      - description: Updated tender details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.Tender'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Tender'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Update an existing tender
+      tags:
+      - Tender
+  /tenders/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a tender by its ID
+      parameters:
+      - description: Tender ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Delete an existing tender
+      tags:
+      - Tender
+  /trendes/bids/contractor/:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all bids submitted by a specific contractor using their
+        ID
+      parameters:
+      - description: Contractor ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of bids submitted by the contractor
+          schema:
+            items:
+              $ref: '#/definitions/model.Bid'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: View bids by contractor ID
+      tags:
+      - Bid
+swagger: "2.0"

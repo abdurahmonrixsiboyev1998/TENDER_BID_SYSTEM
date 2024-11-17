@@ -7,7 +7,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// Config struct holds all configuration variables
 type Config struct {
 	DBHost     string
 	DBUser     string
@@ -18,14 +17,11 @@ type Config struct {
 	JWTSecret  string
 }
 
-// LoadConfig loads configuration from .env file or environment variables
 func LoadConfig() *Config {
-	// Load environment variables from .env file
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found, relying on system environment variables.")
 	}
 
-	// Return the configuration
 	return &Config{
 		DBHost:     getEnv("DB_HOST", "localhost"),
 		DBUser:     getEnv("DB_USER", "postgres"),
@@ -37,7 +33,6 @@ func LoadConfig() *Config {
 	}
 }
 
-// getEnv fetches environment variable or uses default value if not set
 func getEnv(key, defaultValue string) string {
 	if value, exists := os.LookupEnv(key); exists {
 		return value

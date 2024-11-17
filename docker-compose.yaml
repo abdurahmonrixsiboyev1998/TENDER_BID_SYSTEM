@@ -1,0 +1,44 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:14-alpine
+    container_name: postgresdb112
+    environment:
+      - POSTGRES_PASSWORD=14022014
+      - PG_URL=postgres://postgres:14022014@postgres:5432/tender_bid_system?sslmode=disable
+    volumes:
+      - income-db-data:/var/lib/postgresql/data
+      - ./income-service/migrations:/docker-entrypoint-initdb.d
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres || exit 1" ]
+      interval: 30s
+      retries: 3
+      start_period: 30s
+      timeout: 10s
+    networks:
+      - finance
+
+  app111:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: myapp_app1111
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: localhost
+      DB_USER: postgres
+      DB_PASSWORD: 14022014
+      DB_NAME: tender_bid_system
+volumes:
+  income-db-data:
+  mongo-db-data:
+
+networks:
+  finance:
+
